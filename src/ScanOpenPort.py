@@ -1,4 +1,3 @@
-# Reference: https://codeonby.com/2021/02/24/port-scanner-gui-in-python-3/
 import socket # == sockets allows to establish network connections over various network protocol
 import sys
 import threading
