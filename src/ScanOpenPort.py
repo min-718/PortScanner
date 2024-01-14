@@ -152,7 +152,7 @@ L33 = Label(gui, text="")
 L33.place(x=180, y=210)
 
 # Display the list of open ports
-L34 = Label(gui, text="List of open ports:")
+L34 = Label(gui, text="List of Open Ports:")
 L34.place(x=16, y=270)
 frame = Frame(gui)
 frame.place(x = 16, y = 300, width = 370, height = 200)
