@@ -13,6 +13,7 @@ ports = [] # array to store ports
 target = 'localhost' #default for ip
 start_time = None
 end_time = None
+open_ports_found = False
 
 # Scan Open Port Function (run in thread)
 # This function attempts to connect to a specified port on the target
@@ -27,6 +28,7 @@ def scanPort(target, port):
 			ports.append(port)
 			listbox.insert("end", str(m)) #append to the end of list
 			updateNoOfOpenPort()
+			open_ports_found[0] = True #Set to True if open port is found
 		s.close()
 	except OSError: 
 		print('!!!Too many open sockets. Port ' + str(port)+'!!!')
@@ -59,6 +61,8 @@ def startScan():
 	ip_s = int(L24.get())
 	ip_f = int(L25.get())
 
+	open_ports_found = False
+	
 	# Retrieve the target IP address from the GUI input
 	target = socket.gethostbyname(str(L22.get()))
 
@@ -80,6 +84,9 @@ def startScan():
 	log.append(" End Time:\t" + time.strftime("%Y-%m-%d %H:%M:%S"))
 	log.append(" Runtime:\t{:.2f} seconds".format(runtime))
 
+	if not open_ports_found:
+		listbox.insert("end", "No open ports found on IP Address {}".format(target))
+		
 # Get the network connected
 def get_wifi_name():
     result = subprocess.run(["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True)
