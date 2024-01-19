@@ -173,7 +173,7 @@ scrollbar.config(command=listbox.yview)
 
 wifi_name = get_wifi_name()
 L35 = Label(gui, text="Network Connected: " + wifi_name)
-L35.place(x=120, y=570)
+L35.place(x=20, y=570)
 
 # Button for start scan
 B11 = Button(gui, text = "Start Scan", command=startScan)
