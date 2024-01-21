@@ -121,7 +121,7 @@ class NetshieldPortGUI:
         selected_index = self.listbox_live_hosts.curselection()
         if selected_index:
             target_ip = self.listbox_live_hosts.get(selected_index)
-            print(f"Scanning ports on {target_ip}")
+            # print(f"Scanning ports on {target_ip}")
             self.master.destroy()
             from ScanOpenPort import receive_target
             receive_target(target_ip)
