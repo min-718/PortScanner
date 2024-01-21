@@ -8,7 +8,7 @@ class NetshieldPortGUI:
     def __init__(self, master):
         self.master = master
         master.title('Netshield Port')
-        master.geometry("400x600+20+20")
+        master.geometry("400x630+20+20")
 
         # Colour Palette
         self.configure_color_palette()
