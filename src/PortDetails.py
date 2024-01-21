@@ -23,8 +23,7 @@ class showPortDetails:
         self.listbox = None
         # Start GUI
         self.init_gui()
-        
-     
+    ''' 
     def PortDetails(self):
         print(f"Received target_portnumber in PortDetails: {self.target}")
 
@@ -36,10 +35,32 @@ class showPortDetails:
             self.listbox.insert(0, "Port No: {} Service Name: {}".format(self.target, "Unknown"))
         if not self.target:
             self.listbox.insert(0, "No description found on port {}".format(self.target))
-       
+    '''
+            
+    def PortDetails(self):
+        print(f"Received target_portnumber in PortDetails: {self.target}")
+
+        try:
+            service_name = socket.getservbyport(self.target, "tcp")
+            # Corrected insert statement
+            detail_text = "Port No: {} Service Name: {}".format(self.target, service_name)
+            self.text_widget.config(state=NORMAL)  # Set the state to normal to allow editing
+            self.text_widget.insert(END, detail_text + "\n\n")
+            self.text_widget.config(state=DISABLED)  # Set the state back to disabled (read-only)
+        except (socket.error, OSError):
+            detail_text = "Port No: {} Service Name: {}".format(self.target, "Unknown")
+            self.text_widget.config(state=NORMAL)
+            self.text_widget.insert(END, detail_text + "\n\n")
+            self.text_widget.config(state=DISABLED)
+        if not self.target:
+            description_text = "No description found on port {}".format(self.target)
+            self.text_widget.config(state=NORMAL)
+            self.text_widget.insert(END, description_text + "\n\n")
+            self.text_widget.config(state=DISABLED)
+      
         # Set your OpenAI API key
         #***********************************
-        API_KEY = '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'
+        API_KEY = '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'
         #***********************************
         openai.api_key = API_KEY   
          
@@ -53,8 +74,10 @@ class showPortDetails:
 
         # Extract the generated text from the API response
         generated_content = response['choices'][0]['message']['content']
-        self.listbox.insert(END, generated_content)
-
+        #self.listbox.insert(END, generated_content)
+        self.text_widget.config(state=NORMAL)
+        self.text_widget.insert(END, generated_content+ "\n")
+        self.text_widget.config(state=DISABLED)
 
             
     def get_wifi_name(self):
@@ -75,7 +98,7 @@ class showPortDetails:
             messagebox.showerror("Invalid Format", "Unsupported file format selected.")
             
     def download_result_prompt(self):
-        results = self.listbox.get(0, END)
+        results = self.text_widget.get(1.0, END)
         file_format = simpledialog.askstring("File Format", "Enter file format (pdf, txt, word):").lower()
         if file_format:
             self.download_results(results, file_format)
@@ -119,19 +142,14 @@ class showPortDetails:
         self.L25.insert(0, "1024")
 
 
-        # Display the list of open ports
+        # Display the generated content as normal text with automatic line breaks
         self.L34 = Label(self.gui, text="Port Description :")
         self.L34.place(x=16, y=180)
         frame = Frame(self.gui)
-        frame.place(x=16, y=200, width=370, height=320)
-        self.listbox = Listbox(frame, width=56, height=50)
-        self.listbox.pack(expand=YES, fill=BOTH)
-        self.listbox.place(x=0, y=0)
-        self.listbox.bind('<<ListboxSelect>>')
-        scrollbar = Scrollbar(frame)
-        scrollbar.pack(side=RIGHT, fill=Y)
-        self.listbox.config(yscrollcommand=scrollbar.set)
-        scrollbar.config(command=self.listbox.yview)
+        frame.place(x=16, y=200, width=370, height=300)
+        self.text_widget = Text(frame, wrap=WORD, width=56, height=50)
+        self.text_widget.pack(expand=YES, fill=BOTH)
+        self.text_widget.config(state=DISABLED)  # To make it read-only
 
         wifi_name = self.get_wifi_name()
         self.L35 = Label(self.gui, text="Network Connected: " + wifi_name)
