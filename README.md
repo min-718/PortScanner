@@ -7,3 +7,4 @@ To run the scanner, you need to
 4. Register for openai account and get an API Key
    -> https://platform.openai.com/signup/
    -> https://platform.openai.com/api-keys
+5. Key in your API key in PortDetails Module
