@@ -174,8 +174,8 @@ class NetshieldPortScanner:
         # self.B21.place(x=90, y=500, width=70)
 
         # Button for download result
-        self.B21 = Button(self.gui, text="Download Result")
-        self.B21.place(x=90, y=540, width=100)
+        # self.B21 = Button(self.gui, text="Download Result")
+        # self.B21.place(x=90, y=540, width=100)
 
         # ==== Start GUI ====
         self.gui.resizable(False, False)
