@@ -39,7 +39,7 @@ class showPortDetails:
        
         # Set your OpenAI API key
         #***********************************
-        API_KEY = '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'
+        API_KEY = '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'
         #***********************************
         openai.api_key = API_KEY   
          
@@ -73,6 +73,12 @@ class showPortDetails:
             DownloadResult.download_results_to_word(results)
         else:
             messagebox.showerror("Invalid Format", "Unsupported file format selected.")
+            
+    def download_result_prompt(self):
+        results = self.listbox.get(0, END)
+        file_format = simpledialog.askstring("File Format", "Enter file format (pdf, txt, word):").lower()
+        if file_format:
+            self.download_results(results, file_format)
             
     def init_gui(self):
         # ===== START OF GRAPHICAL USER INTERFACE =====
@@ -137,18 +143,11 @@ class showPortDetails:
 
         # Button for start scan
         self.B11 = Button(self.gui, text="Search Port Details", command=lambda: self.PortDetails())
-
         self.B11.place(x=16, y=540, width=130)
         
         # Button for download result
         self.B21 = Button(self.gui, text="Download Result", command=self.download_result_prompt)
         self.B21.place(x=150, y=540, width=100)
-
-    def download_result_prompt(self):
-        results = self.listbox.get(0, END)
-        file_format = simpledialog.askstring("File Format", "Enter file format (pdf, txt, word):").lower()
-        if file_format:
-            self.download_results(results, file_format)
 
         # ==== Start GUI ====
         self.gui.resizable(False, False)
