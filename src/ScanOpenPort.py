@@ -18,8 +18,6 @@ class NetshieldPortScanner:
         self.listbox = None
         # Start GUI
         self.init_gui()
-        # Display the list of open port
-        self.create_open_port_widgets()
         
     def scan_port(self, target, port):
         try:
@@ -30,7 +28,8 @@ class NetshieldPortScanner:
                 m = ' Port %d ' % (port,)
                 self.ports.append(port)
                 self.listbox.insert("end", str(m))  # append to the end of list
-                
+                self.update_no_of_open_port()
+
                 # Assuming the `receive_target` function is in the `PortDetails` module
                 from PortDetails import receive_target  
 
@@ -43,8 +42,6 @@ class NetshieldPortScanner:
                 button = Button(text=">", command=lambda p=port: handle_button_click(p), padx=5, pady=1)
                 button.pack(side=TOP)
 
-                
-                self.update_no_of_open_port()
             s.close()
         except OSError:
             print('!!!Too many open sockets. Port ' + str(port) + '!!!')
@@ -57,7 +54,6 @@ class NetshieldPortScanner:
         self.L27.configure(text=rtext)
 
     def start_scan(self):
-        print(f"Received target_ip  in start_Scan: {self.target}")
         self.ports = []
         self.start_time = time.time()
         self.L29.configure(text=time.strftime("%Y-%m-%d %H:%M:%S"))
@@ -94,24 +90,6 @@ class NetshieldPortScanner:
         for line in output_lines:
             if "SSID" in line:
                 return line.split(":")[1].strip()
-	
-    def create_open_port_widgets(self):
-        # Display the list of open port
-        #self.label_open_port_title = Label(self.master, text="Open Ports :")
-        #self.label_open_port_title.place(x=16, y=180)
-
-        self.listbox_open_port = Listbox(self.master, width=40, height=10)
-        #self.listbox_open_port.place(x=100, y=185)
-
-        #self.scrollbar_open_port = Scrollbar(self.master, command=self.listbox_open_port.yview)
-        #self.scrollbar_open_port.place(x=404, y=300, height=self.listbox_open_port.winfo_reqheight())
-        #self.listbox_open_port.config(yscrollcommand=self.scrollbar_open_port.set)
-
-        self.listbox_open_port.bind('<<ListboxSelect>>', self.on_select_open_port)
-
-        #self.label_instruction = Label(self.master, text="**Click on the target open port to know more details.")
-        #self.label_instruction.place(x=16, y=360)
- 
  
     def init_gui(self):
         # ===== START OF GRAPHICAL USER INTERFACE =====
@@ -153,33 +131,33 @@ class NetshieldPortScanner:
 
         # Display number of open ports
         self.L26 = Label(self.gui, text="Number of Open Ports: ")
-        self.L26.place(x=16, y=180)
+        self.L26.place(x=16, y=210)
         self.L27 = Label(self.gui)
-        self.L27.place(x=200, y=180)
+        self.L27.place(x=200, y=210)
 
         # Display start time of the scan
         self.L28 = Label(self.gui, text="Search Start Time:")
-        self.L28.place(x=16, y=210)
+        self.L28.place(x=16, y=240)
         self.L29 = Label(self.gui, text="")
-        self.L29.place(x=180, y=210)
+        self.L29.place(x=180, y=240)
 
         # Display end time of the scan
         self.L30 = Label(self.gui, text="Search End Time:")
-        self.L30.place(x=16, y=240)
+        self.L30.place(x=16, y=270)
         self.L31 = Label(self.gui, text="")
-        self.L31.place(x=180, y=240)
+        self.L31.place(x=180, y=270)
 
         # Display the run time of the scan
         self.L32 = Label(self.gui, text="Search Duration:")
-        self.L32.place(x=16, y=270)
+        self.L32.place(x=16, y=300)
         self.L33 = Label(self.gui, text="")
-        self.L33.place(x=180, y=270)
+        self.L33.place(x=180, y=300)
 
         # Display the list of open ports
         self.L34 = Label(self.gui, text="List of Open Ports:")
-        self.L34.place(x=16, y=300)
+        self.L34.place(x=16, y=330)
         frame = Frame(self.gui)
-        frame.place(x=16, y=330, width=370, height=200)
+        frame.place(x=16, y=360, width=370, height=200)
         self.listbox = Listbox(frame, width=59, height=12)
         self.listbox.pack(expand=YES, fill=BOTH)
         self.listbox.place(x=0, y=0)
@@ -197,33 +175,15 @@ class NetshieldPortScanner:
         self.L36.place(x=16, y=115)
         
         self.L36 = Label(self.gui, text="Scan Summary", font=("Helvetica", 14))
-        self.L36.place(x=125, y=150)
+        self.L36.place(x=125, y=170)
 
         # Button for start scan
         self.B11 = Button(self.gui, text="Start Scan", command=lambda: self.start_scan())
-        self.B11.place(x=16, y=540, width=70)
-
-        # # Button to return to the previous page
-        # self.B21 = Button(self.gui, text="Back")
-        # self.B21.place(x=90, y=500, width=70)
-
-        # Button for download result
-        self.B21 = Button(self.gui, text="Download Result")
-        self.B21.place(x=90, y=540, width=100)
+        self.B11.place(x=160, y=140, width=70)
 
         # ==== Start GUI ====
         self.gui.resizable(False, False)
         self.gui.mainloop()
-        
-    def on_select_open_port(self, port):
-        selected_index = self.listbox_open_port.curselection()
-        if selected_index:
-            target_portnumber = self.listbox_open_port.get(selected_index)
-            print(f"Searching details on {target_portnumber}")
-            self.master.destroy()
-            from PortDetails import receive_target
-            receive_target(target_portnumber)
-            
             
 scanner = None
 
