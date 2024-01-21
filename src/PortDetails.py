@@ -37,7 +37,9 @@ class showPortDetails:
             self.listbox.insert(0, "No description found on port {}".format(self.target))
        
         # Set your OpenAI API key
-        API_KEY = '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'
+        #***********************************
+        API_KEY = 'CHANGE TO YOUR API KEY'
+        #***********************************
         openai.api_key = API_KEY   
          
         # Define the prompt       
