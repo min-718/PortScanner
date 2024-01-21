@@ -34,10 +34,25 @@ class showPortDetails:
             service_name = socket.getservbyport(port, "tcp")
             self.listbox.insert("Port No: {} Service Name: {}".format(port, service_name))
         except (socket.error, OSError):
-            self.listbox.insert("Port No: {} Service Name: {}".format(port, "Unknown"))
-        if not self.ports:
-            self.listbox.insert("end", "No description found on port {}".format(self.target))
-
+            self.listbox.insert(0, "Port No: {} Service Name: {}".format(self.target, "Unknown"))
+        if not self.target:
+            self.listbox.insert(0, "No description found on port {}".format(self.target))
+       
+        # Set your OpenAI API key
+        API_KEY = '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'
+        openai.api_key = API_KEY   
+         
+        # Define the prompt       
+        # Make a request to the OpenAI API
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # You can choose a different engine
+            messages=[{"role": "user", 
+                        "content": "What is the vulnerabilities if port {} is opened".format(self.target) }]
+        )
+        generated_content = response['choices'][0]['message']['content']
+        # Extract the generated text from the API response
+        self.listbox.insert(END, generated_content)       
+   
 
             
     def get_wifi_name(self):
@@ -125,10 +140,7 @@ class showPortDetails:
 
         wifi_name = self.get_wifi_name()
         self.L35 = Label(self.gui, text="Network Connected: " + wifi_name)
-        self.L35.place(x=20, y=600)
-        
-        self.L36 = Label(self.gui, text="**You may specify the port number to investigate.")
-        self.L36.place(x=16, y=115)
+        self.L35.place(x=20, y=600)        
         
         self.L36 = Label(self.gui, text="Port Details", font=("Helvetica", 14))
         self.L36.place(x=125, y=150)
