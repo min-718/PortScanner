@@ -2,7 +2,7 @@ from tkinter import *
 import socket
 import ipaddress
 import nmap
-
+import socket
 
 class NetshieldPortGUI:
     def __init__(self, master):
@@ -72,6 +72,11 @@ class NetshieldPortGUI:
         self.scrollbar_live_hosts.place(x=404, y=300, height=self.listbox_live_hosts.winfo_reqheight())
         self.listbox_live_hosts.config(yscrollcommand=self.scrollbar_live_hosts.set)
 
+        self.listbox_live_hosts.bind('<<ListboxSelect>>', self.on_select_live_host)
+
+        self.label_instruction = Label(self.master, text="**Please click on the target host if you want to scan for open ports.")
+        self.label_instruction.place(x=16, y=360)
+
     def get_network_info(self):
         try:
             host_name = socket.gethostname()
@@ -112,6 +117,16 @@ class NetshieldPortGUI:
 
         return live_hosts
 
+    def on_select_live_host(self, event):
+        selected_index = self.listbox_live_hosts.curselection()
+        if selected_index:
+            target_ip = self.listbox_live_hosts.get(selected_index)
+            print(f"Scanning ports on {target_ip}")
+            self.master.destroy()
+            from ScanOpenPort import receive_target
+            receive_target(target_ip)
+            
+    
 
 def main():
     root = Tk()
