@@ -18,7 +18,9 @@ class NetshieldPortScanner:
         self.listbox = None
         # Start GUI
         self.init_gui()
-
+        # Display the list of open port
+        self.create_open_port_widgets()
+        
     def scan_port(self, target, port):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,6 +30,21 @@ class NetshieldPortScanner:
                 m = ' Port %d ' % (port,)
                 self.ports.append(port)
                 self.listbox.insert("end", str(m))  # append to the end of list
+                
+                # Assuming the `receive_target` function is in the `PortDetails` module
+                from PortDetails import receive_target  
+
+                # Function to handle button click and send the value to target_portnumber
+                def handle_button_click(port):
+                    target_portnumber = port
+                    receive_target(target_portnumber)
+                    # You can add more code here if needed
+
+                # Create a button dynamically for each open port
+                button = Button(text=">", command=lambda p=port: handle_button_click(p), padx=5, pady=1)
+                button.pack(side=TOP)
+
+                
                 self.update_no_of_open_port()
             s.close()
         except OSError:
@@ -79,6 +96,24 @@ class NetshieldPortScanner:
             if "SSID" in line:
                 return line.split(":")[1].strip()
 	
+    def create_open_port_widgets(self):
+        # Display the list of open port
+        #self.label_open_port_title = Label(self.master, text="Open Ports :")
+        #self.label_open_port_title.place(x=16, y=180)
+
+        self.listbox_open_port = Listbox(self.master, width=40, height=10)
+        #self.listbox_open_port.place(x=100, y=185)
+
+        #self.scrollbar_open_port = Scrollbar(self.master, command=self.listbox_open_port.yview)
+        #self.scrollbar_open_port.place(x=404, y=300, height=self.listbox_open_port.winfo_reqheight())
+        #self.listbox_open_port.config(yscrollcommand=self.scrollbar_open_port.set)
+
+        self.listbox_open_port.bind('<<ListboxSelect>>', self.on_select_open_port)
+
+        #self.label_instruction = Label(self.master, text="**Click on the target open port to know more details.")
+        #self.label_instruction.place(x=16, y=360)
+ 
+ 
     def init_gui(self):
         # ===== START OF GRAPHICAL USER INTERFACE =====
         self.gui = Tk()
@@ -180,10 +215,21 @@ class NetshieldPortScanner:
         # ==== Start GUI ====
         self.gui.resizable(False, False)
         self.gui.mainloop()
-
+        
+    def on_select_open_port(self, port):
+        selected_index = self.listbox_open_port.curselection()
+        if selected_index:
+            target_portnumber = self.listbox_open_port.get(selected_index)
+            print(f"Searching details on {target_portnumber}")
+            self.master.destroy()
+            from PortDetails import receive_target
+            receive_target(target_portnumber)
+            
+            
 scanner = None
 
 def receive_target(target_ip):
     global scanner
     print(f"Target IP: {target_ip}")
     scanner = NetshieldPortScanner(target_ip)
+    

@@ -7,8 +7,7 @@ from tkinter import *
 from tkinter import messagebox
 import subprocess
 import openai
-from apikey import APIKEY
-
+import json
 
 class showPortDetails:
     def __init__(self, target_portnumber):
@@ -25,18 +24,40 @@ class showPortDetails:
         self.init_gui()
         
      
-    def PortDetails(self, target, port):
+    def PortDetails(self):
         print(f"Received target_portnumber in PortDetails: {self.target}")
-        self.ports = []
-        self.start_time = time.time()
-        self.L29.configure(text=time.strftime("%Y-%m-%d %H:%M:%S"))
+
         try:
-            service_name = socket.getservbyport(port, "tcp")
-            self.listbox.insert("Port No: {} Service Name: {}".format(port, service_name))
+            service_name = socket.getservbyport(self.target, "tcp")
+            # Corrected insert statement
+            self.listbox.insert(0, "Port No: {} Service Name: {}".format(self.target, service_name))
         except (socket.error, OSError):
-            self.listbox.insert("Port No: {} Service Name: {}".format(port, "Unknown"))
-        if not self.ports:
-            self.listbox.insert("end", "No description found on port {}".format(self.target))
+            self.listbox.insert(0, "Port No: {} Service Name: {}".format(self.target, "Unknown"))
+        if not self.target:
+            self.listbox.insert(0, "No description found on port {}".format(self.target))
+       
+        # Set your OpenAI API key
+        api_key = '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'
+        openai.api_key = api_key   
+         
+        # Define the prompt
+        try:
+            # Make a request to the OpenAI API
+            response = openai.Completion.create(
+                model="gpt-3.5-turbo",  # You can choose a different engine
+                messages=[{"role": "user", 
+                           "content": "What is the vulnerabilities if port {} is opened".format(self.target) }]
+            )
+
+            # Extract the generated text from the API response
+            generated_text = response['choices'][0]['text']
+            self.listbox.insert(END, generated_text)
+        except Exception as e:
+            print(f"Error in PortDetails: {e}")
+            
+        finally:
+            # This block will always run, use it to print a message.
+            print("Finished processing port {}".format(self.target))
 
 
             
@@ -85,36 +106,13 @@ class showPortDetails:
         self.L25.place(x=290, y=90, width=95)
         self.L25.insert(0, "1024")
 
-        # Display number of open ports
-        self.L26 = Label(self.gui, text="Number of Open Ports: ")
-        self.L26.place(x=16, y=180)
-        self.L27 = Label(self.gui)
-        self.L27.place(x=200, y=180)
-
-        # Display start time of the scan
-        self.L28 = Label(self.gui, text="Search Start Time:")
-        self.L28.place(x=16, y=210)
-        self.L29 = Label(self.gui, text="")
-        self.L29.place(x=180, y=210)
-
-        # Display end time of the scan
-        self.L30 = Label(self.gui, text="Search End Time:")
-        self.L30.place(x=16, y=240)
-        self.L31 = Label(self.gui, text="")
-        self.L31.place(x=180, y=240)
-
-        # Display the run time of the scan
-        self.L32 = Label(self.gui, text="Search Duration:")
-        self.L32.place(x=16, y=270)
-        self.L33 = Label(self.gui, text="")
-        self.L33.place(x=180, y=270)
 
         # Display the list of open ports
         self.L34 = Label(self.gui, text="Port Description :")
-        self.L34.place(x=16, y=300)
+        self.L34.place(x=16, y=180)
         frame = Frame(self.gui)
-        frame.place(x=16, y=330, width=370, height=200)
-        self.listbox = Listbox(frame, width=59, height=12)
+        frame.place(x=16, y=200, width=370, height=320)
+        self.listbox = Listbox(frame, width=56, height=50)
         self.listbox.pack(expand=YES, fill=BOTH)
         self.listbox.place(x=0, y=0)
         self.listbox.bind('<<ListboxSelect>>')
@@ -136,7 +134,7 @@ class showPortDetails:
         # Button for start scan
         self.B11 = Button(self.gui, text="Search Port Details", command=lambda: self.PortDetails())
 
-        self.B11.place(x=16, y=540, width=70)
+        self.B11.place(x=16, y=540, width=130)
 
         # # Button to return to the previous page
         # self.B21 = Button(self.gui, text="Back")
@@ -144,7 +142,7 @@ class showPortDetails:
 
         # Button for download result
         self.B21 = Button(self.gui, text="Download Result")
-        self.B21.place(x=90, y=540, width=100)
+        self.B21.place(x=150, y=540, width=100)
 
         # ==== Start GUI ====
         self.gui.resizable(False, False)
@@ -160,4 +158,5 @@ def receive_target(target_portnumber):
     global scanner
     print(f"Target Port Number: {target_portnumber}")
     scanner = showPortDetails(target_portnumber)
-    messagebox.showinfo("Hello, World!")    
+    
+       
