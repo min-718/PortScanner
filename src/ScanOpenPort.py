@@ -6,17 +6,16 @@ from tkinter import *
 import subprocess
 
 class NetshieldPortScanner:
-    def __init__(self):
+    def __init__(self, target_ip):
         # Scan Vars
         self.ip_s = 1  # Default
         self.ip_f = 1024
         self.log = []
         self.ports = []  # array to store ports
-        self.target = 'localhost'  # default for ip
+        self.target = target_ip # default for ip
         self.start_time = None
         self.end_time = None
         self.listbox = None
-
         # Start GUI
         self.init_gui()
 
@@ -41,16 +40,12 @@ class NetshieldPortScanner:
         rtext = " [ " + str(len(self.ports)) + " / " + str(self.ip_f) + "]"
         self.L27.configure(text=rtext)
 
-    def clear_scan(self):
-        self.listbox.delete(0, 'end')
-
-    def start_scan(self, target_ip):
-        self.clear_scan()
-        self.target = target_ip
+    def start_scan(self):
+        print(f"Received target_ip  in start_Scan: {self.target}")
         self.ports = []
         self.start_time = time.time()
         self.L29.configure(text=time.strftime("%Y-%m-%d %H:%M:%S"))
-
+       
         # Get ports ranges from GUI (get the starting point and ending point of ports)
         self.ip_s = int(self.L24.get())
         self.ip_f = int(self.L25.get())
@@ -83,12 +78,12 @@ class NetshieldPortScanner:
         for line in output_lines:
             if "SSID" in line:
                 return line.split(":")[1].strip()
-
+	
     def init_gui(self):
         # ===== START OF GRAPHICAL USER INTERFACE =====
         self.gui = Tk()
         self.gui.title('Netshield Port')
-        self.gui.geometry("400x600+20+20")
+        self.gui.geometry("400x630+20+20")
 
         # Colour Palette
         m1c = '#0a0a0a'
@@ -99,8 +94,8 @@ class NetshieldPortScanner:
                                highlightColor=m1c, highlightBackground=m1c)
 
         # Page Title
-        self.L11 = Label(self.gui, text="Scan Summary", font=("Helvetica", 16))
-        self.L11.place(x=125, y=10)
+        self.L11 = Label(self.gui, text="Scan Open Port", font=("Helvetica", 16))
+        self.L11.place(x=115, y=10)
 
         # Get IP Address
         self.L21 = Label(self.gui, text="IP Address: ")
@@ -108,6 +103,7 @@ class NetshieldPortScanner:
 
         self.L22 = Entry(self.gui)
         self.L22.place(x=180, y=60)
+        self.L22.insert(0, self.target)
 
         # Get the Port Range (By default 1-1024)
         self.L23 = Label(self.gui, text="Ports Range: ")
@@ -123,33 +119,33 @@ class NetshieldPortScanner:
 
         # Display number of open ports
         self.L26 = Label(self.gui, text="Number of Open Ports: ")
-        self.L26.place(x=16, y=120)
+        self.L26.place(x=16, y=180)
         self.L27 = Label(self.gui)
-        self.L27.place(x=200, y=120)
+        self.L27.place(x=200, y=180)
 
         # Display start time of the scan
-        self.L28 = Label(self.gui, text="Start Time:")
-        self.L28.place(x=16, y=150)
+        self.L28 = Label(self.gui, text="Search Start Time:")
+        self.L28.place(x=16, y=210)
         self.L29 = Label(self.gui, text="")
-        self.L29.place(x=180, y=150)
+        self.L29.place(x=180, y=210)
 
         # Display end time of the scan
-        self.L30 = Label(self.gui, text="End Time:")
-        self.L30.place(x=16, y=180)
+        self.L30 = Label(self.gui, text="Search End Time:")
+        self.L30.place(x=16, y=240)
         self.L31 = Label(self.gui, text="")
-        self.L31.place(x=180, y=180)
+        self.L31.place(x=180, y=240)
 
         # Display the run time of the scan
         self.L32 = Label(self.gui, text="Search Duration:")
-        self.L32.place(x=16, y=210)
+        self.L32.place(x=16, y=270)
         self.L33 = Label(self.gui, text="")
-        self.L33.place(x=180, y=210)
+        self.L33.place(x=180, y=270)
 
         # Display the list of open ports
         self.L34 = Label(self.gui, text="List of Open Ports:")
-        self.L34.place(x=16, y=270)
+        self.L34.place(x=16, y=300)
         frame = Frame(self.gui)
-        frame.place(x=16, y=300, width=370, height=200)
+        frame.place(x=16, y=330, width=370, height=200)
         self.listbox = Listbox(frame, width=59, height=12)
         self.listbox.pack(expand=YES, fill=BOTH)
         self.listbox.place(x=0, y=0)
@@ -161,23 +157,33 @@ class NetshieldPortScanner:
 
         wifi_name = self.get_wifi_name()
         self.L35 = Label(self.gui, text="Network Connected: " + wifi_name)
-        self.L35.place(x=20, y=570)
+        self.L35.place(x=20, y=600)
+        
+        self.L36 = Label(self.gui, text="**You may specify the port range to scan.")
+        self.L36.place(x=16, y=115)
+        
+        self.L36 = Label(self.gui, text="Scan Summary", font=("Helvetica", 14))
+        self.L36.place(x=125, y=150)
 
         # Button for start scan
-        self.B11 = Button(self.gui, text="Start Scan", command=lambda: self.start_scan(self.L22.get()))
-        self.B11.place(x=16, y=500, width=70)
+        self.B11 = Button(self.gui, text="Start Scan", command=lambda: self.start_scan())
+        self.B11.place(x=16, y=540, width=70)
 
-        # Button to return to the previous page
-        self.B21 = Button(self.gui, text="Back")
-        self.B21.place(x=90, y=500, width=70)
+        # # Button to return to the previous page
+        # self.B21 = Button(self.gui, text="Back")
+        # self.B21.place(x=90, y=500, width=70)
 
         # Button for download result
         self.B21 = Button(self.gui, text="Download Result")
-        self.B21.place(x=210, y=500, width=100)
+        self.B21.place(x=90, y=540, width=100)
 
         # ==== Start GUI ====
         self.gui.resizable(False, False)
         self.gui.mainloop()
 
+scanner = None
 
-NetshieldPortScanner()
+def receive_target(target_ip):
+    global scanner
+    print(f"Target IP: {target_ip}")
+    scanner = NetshieldPortScanner(target_ip)
