@@ -4,10 +4,11 @@ import sys
 import threading
 import time
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox,simpledialog
 import subprocess
 import openai
 import json
+import DownloadResult
 
 class showPortDetails:
     def __init__(self, target_portnumber):
@@ -38,7 +39,7 @@ class showPortDetails:
        
         # Set your OpenAI API key
         #***********************************
-        API_KEY = 'CHANGE TO YOUR API KEY'
+        API_KEY = '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'
         #***********************************
         openai.api_key = API_KEY   
          
@@ -62,6 +63,16 @@ class showPortDetails:
         for line in output_lines:
             if "SSID" in line:
                 return line.split(":")[1].strip()        
+            
+    def download_results(self, results, file_format):
+        if file_format == 'pdf':
+            DownloadResult.download_results_to_pdf(results)
+        elif file_format == 'txt':
+            DownloadResult.download_results_to_txt(results)
+        elif file_format == 'word':
+            DownloadResult.download_results_to_word(results)
+        else:
+            messagebox.showerror("Invalid Format", "Unsupported file format selected.")
             
     def init_gui(self):
         # ===== START OF GRAPHICAL USER INTERFACE =====
@@ -128,14 +139,16 @@ class showPortDetails:
         self.B11 = Button(self.gui, text="Search Port Details", command=lambda: self.PortDetails())
 
         self.B11.place(x=16, y=540, width=130)
-
-        # # Button to return to the previous page
-        # self.B21 = Button(self.gui, text="Back")
-        # self.B21.place(x=90, y=500, width=70)
-
+        
         # Button for download result
-        self.B21 = Button(self.gui, text="Download Result")
+        self.B21 = Button(self.gui, text="Download Result", command=self.download_result_prompt)
         self.B21.place(x=150, y=540, width=100)
+
+    def download_result_prompt(self):
+        results = self.listbox.get(0, END)
+        file_format = simpledialog.askstring("File Format", "Enter file format (pdf, txt, word):").lower()
+        if file_format:
+            self.download_results(results, file_format)
 
         # ==== Start GUI ====
         self.gui.resizable(False, False)
