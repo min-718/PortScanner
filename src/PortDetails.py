@@ -1,4 +1,3 @@
-#10.212.94.65
 import socket # == sockets allows to establish network connections over various network protocol
 import sys
 import threading
@@ -8,38 +7,22 @@ from tkinter import messagebox,simpledialog
 import subprocess
 import openai
 import json
-import DownloadResult
 
 class showPortDetails:
-    def __init__(self, target_portnumber):
+    def __init__(self, target_port):
         # Scan Vars
         self.portnumber_s = 1  # Default
         self.portnumber_f = 1024
         self.log = []
         self.ports = []  # array to store ports
-        self.target = target_portnumber # default for portnumber
-        self.start_time = None
-        self.end_time = None
-        self.listbox = None
+        self.target = target_port # default for portnumber
+
         # Start GUI
         self.init_gui()
-    ''' 
-    def PortDetails(self):
-        print(f"Received target_portnumber in PortDetails: {self.target}")
-
-        try:
-            service_name = socket.getservbyport(self.target, "tcp")
-            # Corrected insert statement
-            self.listbox.insert(0, "Port No: {} Service Name: {}".format(self.target, service_name))
-        except (socket.error, OSError):
-            self.listbox.insert(0, "Port No: {} Service Name: {}".format(self.target, "Unknown"))
-        if not self.target:
-            self.listbox.insert(0, "No description found on port {}".format(self.target))
-    '''
             
     def PortDetails(self):
-        print(f"Received target_portnumber in PortDetails: {self.target}")
-
+        print(f"Received target_port in PortDetails: {self.target}")
+        #To get service name by using getservbyport function
         try:
             service_name = socket.getservbyport(self.target, "tcp")
             # Corrected insert statement
@@ -47,34 +30,36 @@ class showPortDetails:
             self.text_widget.config(state=NORMAL)  # Set the state to normal to allow editing
             self.text_widget.insert(END, detail_text + "\n\n")
             self.text_widget.config(state=DISABLED)  # Set the state back to disabled (read-only)
+            
         except (socket.error, OSError):
             detail_text = "Port No: {} Service Name: {}".format(self.target, "Unknown")
             self.text_widget.config(state=NORMAL)
             self.text_widget.insert(END, detail_text + "\n\n")
             self.text_widget.config(state=DISABLED)
+            
         if not self.target:
             description_text = "No description found on port {}".format(self.target)
             self.text_widget.config(state=NORMAL)
             self.text_widget.insert(END, description_text + "\n\n")
             self.text_widget.config(state=DISABLED)
-      
+        
+            
+        #To get port vulnerabilities based on port number by using OpenAI API     
         # Set your OpenAI API key
         #***********************************
-        API_KEY = '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'
+        API_KEY = 'REPLACE_WITH_YOUR_OWN_KEY'
         #***********************************
         openai.api_key = API_KEY   
          
-        # Define the prompt       
-        # Make a request to the OpenAI API
+        # Define the prompt to the OpenAI API
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # You can choose a different engine
+            model="gpt-3.5-turbo",  
             messages=[{"role": "user", 
                         "content": "What is the vulnerabilities if port {} is opened".format(self.target) }]
         )
 
         # Extract the generated text from the API response
         generated_content = response['choices'][0]['message']['content']
-        #self.listbox.insert(END, generated_content)
         self.text_widget.config(state=NORMAL)
         self.text_widget.insert(END, generated_content+ "\n")
         self.text_widget.config(state=DISABLED)
@@ -86,22 +71,7 @@ class showPortDetails:
         for line in output_lines:
             if "SSID" in line:
                 return line.split(":")[1].strip()        
-            
-    def download_results(self, results, file_format):
-        if file_format == 'pdf':
-            DownloadResult.download_results_to_pdf(results)
-        elif file_format == 'txt':
-            DownloadResult.download_results_to_txt(results)
-        elif file_format == 'word':
-            DownloadResult.download_results_to_word(results)
-        else:
-            messagebox.showerror("Invalid Format", "Unsupported file format selected.")
-            
-    def download_result_prompt(self):
-        results = self.text_widget.get(1.0, END)
-        file_format = simpledialog.askstring("File Format", "Enter file format (pdf, txt, word):").lower()
-        if file_format:
-            self.download_results(results, file_format)
+ 
             
     def init_gui(self):
         # ===== START OF GRAPHICAL USER INTERFACE =====
@@ -141,7 +111,6 @@ class showPortDetails:
         self.L25.place(x=290, y=90, width=95)
         self.L25.insert(0, "1024")
 
-
         # Display the generated content as normal text with automatic line breaks
         self.L34 = Label(self.gui, text="Port Description :")
         self.L34.place(x=16, y=180)
@@ -154,18 +123,13 @@ class showPortDetails:
         wifi_name = self.get_wifi_name()
         self.L35 = Label(self.gui, text="Network Connected: " + wifi_name)
         self.L35.place(x=20, y=600)
-        
-        
+               
         self.L36 = Label(self.gui, text="Port Details", font=("Helvetica", 14))
         self.L36.place(x=125, y=150)
 
         # Button for start scan
         self.B11 = Button(self.gui, text="Search Port Details", command=lambda: self.PortDetails())
         self.B11.place(x=16, y=540, width=130)
-        
-        # Button for download result
-        self.B21 = Button(self.gui, text="Download Result", command=self.download_result_prompt)
-        self.B21.place(x=150, y=540, width=100)
 
         # ==== Start GUI ====
         self.gui.resizable(False, False)
@@ -177,9 +141,9 @@ class showPortDetails:
         
 scanner = None
 
-def receive_target(target_portnumber):
+def receive_target(target_port):
     global scanner
-    print(f"Target Port Number: {target_portnumber}")
-    scanner = showPortDetails(target_portnumber)
+    print(f"Target Port Number: {target_port}")
+    scanner = showPortDetails(target_port)
     
        
