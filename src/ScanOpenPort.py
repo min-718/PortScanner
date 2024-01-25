@@ -12,13 +12,15 @@ class NetshieldPortScanner:
         self.ip_f = 1024
         self.log = []
         self.ports = []  # array to store ports
-        self.target = target_ip # default for ip
+        self.target = target_ip # default for port
         self.start_time = None
         self.end_time = None
         self.listbox = None
+
         # Start GUI
         self.init_gui()
         
+
     def scan_port(self, target, port):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,17 +32,19 @@ class NetshieldPortScanner:
                 self.listbox.insert("end", str(m))  # append to the end of list
                 self.update_no_of_open_port()
 
+
                 # Assuming the `receive_target` function is in the `PortDetails` module
                 from PortDetails import receive_target  
 
-                # Function to handle button click and send the value to target_portnumber
+
+                '''# Function to handle button click and send the value to target_portnumber
                 def handle_button_click(port):
-                    target_portnumber = port
-                    receive_target(target_portnumber)
+                    target_port = port
+                    receive_target(target_port)
 
                 # Create a button dynamically for each open port
                 button = Button(text=">", command=lambda p=port: handle_button_click(p), padx=5, pady=1)
-                button.pack(side=TOP)
+                button.pack(side=TOP)'''
 
             s.close()
         except OSError:
@@ -48,10 +52,12 @@ class NetshieldPortScanner:
         except:
             s.close()
             sys.exit()
-
+            
+              
     def update_no_of_open_port(self):
         rtext = " [ " + str(len(self.ports)) + " / " + str(self.ip_f) + "]"
         self.L27.configure(text=rtext)
+        
 
     def start_scan(self):
         self.ports = []
@@ -83,6 +89,7 @@ class NetshieldPortScanner:
 
         if not self.ports:
             self.listbox.insert("end", "No open ports found on IP Address {}".format(self.target))
+            
 
     def get_wifi_name(self):
         result = subprocess.run(["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True)
@@ -90,7 +97,19 @@ class NetshieldPortScanner:
         for line in output_lines:
             if "SSID" in line:
                 return line.split(":")[1].strip()
- 
+            
+            
+    def on_select_port(self, event):
+        selected_port = self.listbox.curselection()
+        if selected_port:
+            target_port_str = self.listbox.get(selected_port)
+            target_port = int(target_port_str.split()[1])  # Convert the port number to an integer
+            print("Selected Port:", target_port)
+            self.gui.destroy()
+            from PortDetails import receive_target
+            receive_target(target_port)
+
+        
     def init_gui(self):
         # ===== START OF GRAPHICAL USER INTERFACE =====
         self.gui = Tk()
@@ -161,7 +180,10 @@ class NetshieldPortScanner:
         self.listbox = Listbox(frame, width=59, height=12)
         self.listbox.pack(expand=YES, fill=BOTH)
         self.listbox.place(x=0, y=0)
-        self.listbox.bind('<<ListboxSelect>>')
+        
+        # Bind the on_select_port function to the listbox selection event
+        self.listbox.bind('<<ListboxSelect>>', self.on_select_port)
+    
         scrollbar = Scrollbar(frame)
         scrollbar.pack(side=RIGHT, fill=Y)
         self.listbox.config(yscrollcommand=scrollbar.set)
